@@ -1,0 +1,54 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sunda</title><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#1A3A2A">
+<meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icons/icon-192.png"><link rel="icon" href="icons/icon-192.png">
+<style>*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#FFF8E7;color:#1A2B22}
+header{background:linear-gradient(135deg,#1A3A2A,#8A4B2A);color:#fff;padding:22px 16px 18px;text-align:center}
+header h1{margin:0;font-size:28px}header p{opacity:.9;margin:6px 0 0}
+.badge{display:inline-block;background:#FFC857;color:#1A3A2A;padding:5px 10px;border-radius:999px;font-size:12px;font-weight:700;margin-top:10px}
+.wrap{max-width:520px;margin:0 auto;padding:14px}
+.card{background:#fff;border-radius:16px;padding:16px;box-shadow:0 6px 20px rgba(0,0,0,.08);margin-bottom:12px}
+.today{font-size:42px;font-weight:800;line-height:1}.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}
+.hd{font-weight:700;font-size:12px;color:#8A4B2A;padding:6px 0}.cell{border:1px solid #eee;border-radius:12px;padding:8px 2px;cursor:pointer;background:#fff}.cell small{display:block;font-size:10px;color:#8A4B2A}.cell.sel{background:#1A3A2A;color:#fff}.cell.sel small{color:#FFC857}.cell.today{border:2px solid #C0392B}.cell.sun{color:#C0392B}
+.row{display:flex;gap:8px;flex-wrap:wrap}.btn{flex:1;border:0;padding:11px;border-radius:12px;font-weight:700;cursor:pointer}.btn-dark{background:#1A3A2A;color:#fff}.btn-light{background:#FFE9B8;color:#1A2B22}
+input[type=date]{flex:1;padding:10px;border-radius:12px;border:1px solid #ddd}.kv{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px dashed #eee}.kv b{color:#1A3A2A}
+.offline-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#22c55e}.install{background:#FFC857;border:0;width:100%;padding:13px;border-radius:14px;font-weight:800;cursor:pointer}
+ol{padding-left:18px;line-height:1.7;font-size:14px}code{background:#FFF3C4;padding:2px 6px;border-radius:6px}
+</style></head><body>
+<header><h1>🌙 Sunda</h1><p>Poé • Pasaran • Wuku • Neptu</p><span class="badge"><span class="offline-dot" id="dot"></span> <span id="net">Online</span> • Bisa Offline Setelah Dibuka Sekali</span></header>
+<div class="wrap">
+<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><button class="btn btn-light" onclick="move(-1)">‹ Bulan Lalu</button><b id="monthLabel"></b><button class="btn btn-light" onclick="move(1)">Bulan Depan ›</button></div>
+<div style="display:flex;gap:8px;margin-top:12px"><input type="date" id="picker"><button class="btn btn-dark" onclick="goPicker()">Lihat</button><button class="btn btn-light" onclick="goToday()">Hari Ini</button></div>
+<div class="grid" style="margin-top:12px"><div class="hd">Ahad</div><div class="hd">Senén</div><div class="hd">Salasa</div><div class="hd">Rebo</div><div class="hd">Kemis</div><div class="hd">Jumaah</div><div class="hd">Saptu</div></div><div class="grid" id="cal"></div></div>
+<div class="card"><div class="today" id="bigDate">--</div><div id="bigDay" style="color:#8A4B2A;font-weight:700"></div>
+<div style="margin-top:10px"><div class="kv"><span>Pasaran</span><b id="dPasaran"></b></div><div class="kv"><span>Wuku</span><b id="dWuku"></b></div><div class="kv"><span>Neptu</span><b id="dNeptu"></b></div><div class="kv"><span>Tahun Saka</span><b id="dSaka"></b></div><div class="kv"><span>Sifat Hari</span><b id="dSifat"></b></div></div>
+<p id="dDesc" style="font-size:14px;line-height:1.6;background:#FFF8E7;padding:12px;border-radius:12px"></p></div>
+<div class="card"><h3 style="margin:0 0 8px">📲 Install Jadi APK</h3><button class="install" id="installBtn">Install Aplikasi</button><p id="installMsg" style="font-size:13px;color:#666"></p>
+<ol><li>Upload semua file ini ke GitHub (index.html, manifest.json, sw.js, offline.html, folder icons/)</li><li>Deploy di Vercel dari repo GitHub itu</li><li>Buka link Vercel di <b>pwabuilder.com</b> → Build → Android → Download APK / AAB</li><li>Install APK-nya. Setelah dibuka sekali, aplikasi bisa dibuka <b>offline</b> tanpa internet.</li></ol></div>
+<div class="card" style="text-align:center;font-size:13px;color:#666">Dijieun ku Aya Sunday • Sunda v1 • Offline Ready</div>
+</div>
+<script>
+const PASARAN=['Legi','Pahing','Pon','Wage','Kliwon'];
+const NEPTU_DINTEN={0:5,1:4,2:3,3:7,4:8,5:6,6:9};
+const NEPTU_PAS={'Legi':5,'Pahing':9,'Pon':7,'Wage':4,'Kliwon':8};
+const DINTEN=['Ahad','Senén','Salasa','Rebo','Kemis','Jumaah','Saptu'];
+const WUKU=['Sinta','Landep','Wukir','Kurantil','Tolu','Gumbreg','Warigalit','Warigagung','Julungwangi','Sungsang','Galungan','Kuningan','Langkir','Mandasiya','Julungpujut','Pahang','Kuruwelut','Marakeh','Tambir','Medangkungan','Maktal','Wuye','Manahil','Prangbakat','Bala','Wugu','Wayang','Kulawu','Dukut','Watugunung'];
+const SIFAT={Legi:'Tenang, cocok untuk memulai hal baru',Pahing:'Energi besar, bagus untuk usaha',Pon:'Seimbang, baik untuk musyawarah',Wage:'Hemat & teliti, bagus untuk menabung',Kliwon:'Kuat spiritual, bagus untuk refleksi'};
+function info(d){const ref=new Date(1970,0,1);const diff=Math.floor((new Date(d.getFullYear(),d.getMonth(),d.getDate())-new Date(1970,0,1))/86400000);const pas=PASARAN[((diff+3)%5+5)%5];const wuku=WUKU[((Math.floor(diff/7)%30)+30)%30];const neptu=NEPTU_DINTEN[d.getDay()]+NEPTU_PAS[pas];return{pas,wuku,neptu};}
+let view=new Date();let selected=new Date();
+function render(){const y=view.getFullYear(),m=view.getMonth();document.getElementById('monthLabel').textContent=new Intl.DateTimeFormat('id-ID',{month:'long',year:'numeric'}).format(view);
+const first=new Date(y,m,1);const days=new Date(y,m+1,0).getDate();let html='';for(let i=0;i<first.getDay();i++)html+='<div></div>';
+for(let d=1;d<=days;d++){const dt=new Date(y,m,d);const inf=info(dt);const isSel=dt.toDateString()===selected.toDateString();const isToday=dt.toDateString()===new Date().toDateString();html+=`<div class="cell ${isSel?'sel':''} ${isToday?'today':''} ${dt.getDay()===0?'sun':''}" onclick="select(${y},${m},${d})"><b>${d}</b><small>${inf.pas}</small></div>`;}
+document.getElementById('cal').innerHTML=html;show(selected);}
+function show(d){const inf=info(d);document.getElementById('bigDate').textContent=d.getDate()+' '+new Intl.DateTimeFormat('id-ID',{month:'long',year:'numeric'}).format(d);document.getElementById('bigDay').textContent=DINTEN[d.getDay()]+' '+inf.pas;document.getElementById('dPasaran').textContent=inf.pas;document.getElementById('dWuku').textContent=inf.wuku;document.getElementById('dNeptu').textContent=inf.neptu;document.getElementById('dSaka').textContent=(d.getFullYear()-78)+' Saka';document.getElementById('dSifat').textContent=SIFAT[inf.pas];document.getElementById('dDesc').textContent=`Poé ${DINTEN[d.getDay()]} ${inf.pas}, Wuku ${inf.wuku}, Neptu ${inf.neptu}. ${SIFAT[inf.pas]}.`;}
+function select(y,m,d){selected=new Date(y,m,d);view=new Date(y,m,1);render();}
+function move(n){view=new Date(view.getFullYear(),view.getMonth()+n,1);render();}
+function goToday(){selected=new Date();view=new Date();render();}
+function goPicker(){const v=document.getElementById('picker').value;if(!v)return;const dt=new Date(v+'T00:00:00');selected=dt;view=new Date(dt.getFullYear(),dt.getMonth(),1);render();}
+function updateNet(){const on=navigator.onLine;document.getElementById('net').textContent=on?'Online':'Offline — mode offline aktif';document.getElementById('dot').style.background=on?'#22c55e':'#f59e0b';}
+window.addEventListener('online',updateNet);window.addEventListener('offline',updateNet);updateNet();
+let deferred;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;document.getElementById('installMsg').textContent='HP kamu sudah bisa install. Klik tombol Install di atas.';});
+document.getElementById('installBtn').onclick=async()=>{if(deferred){deferred.prompt();await deferred.userChoice;deferred=null;}else{document.getElementById('installMsg').textContent='Di HP Android: buka menu ⋮ di Chrome → Tambahkan ke Layar Utama / Install App. Atau build APK via PWABuilder dari link Vercel kamu.';}};
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').then(()=>console.log('SW ok')).catch(()=>{});}
+render();
+</script></body></html>
